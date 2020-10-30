@@ -1,0 +1,40 @@
+apply plugin: 'checkstyle'
+apply plugin: 'com.github.spotbugs'
+
+checkstyle{
+    toolVersion = '8.16'
+    showViolations = true
+    sourceSets = [project.sourceSets.main]
+    configFile = rootProject.file('codequality/checkstyle.xml')
+    configDir = rootProject.file("${rootProject.projectDir}")
+}
+
+tasks.withType(Checkstyle) {
+    ignoreFailures = false
+    showViolations = true
+    reports {
+        xml.enabled true
+        html.enabled true
+        html.stylesheet resources.text.fromFile(rootProject.file('codequality/checkstyle.xsl'))
+        html.destination project.file("build/reports/checkstyle/main.html")
+    }
+}
+
+spotbugs {
+    toolVersion = '3.1.12'
+    effort = "max"
+    sourceSets = [sourceSets.main]
+    reportsDir = file("build/reports/findbugs")
+
+    ignoreFailures = project.findProperty('ignoreBugs') != null
+}
+
+task findbugsHtml {
+    group = "Verification"
+    description = "Creates a human readable Findbugs report"
+    doLast {
+        ant.xslt(in: file("$buildDir/reports/findbugs/main.xml"),
+                out: new File("$buildDir/reports/findbugs/main.html"),
+                style: new File(rootProject.rootDir, 'codequality/findbugs_default.xsl'))
+    }
+}

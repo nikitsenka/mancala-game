@@ -1,0 +1,65 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:2.0.0"
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+}
+
+apply from: file('./gradle/commonChecks.gradle')
+
+group = 'com.mancala.api'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '15'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.vladmihalcea:hibernate-types-52:2.10.0'
+    implementation 'org.postgresql:postgresql:42.2.18'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation 'io.cucumber:cucumber-java:4.3.0'
+    testImplementation 'io.cucumber:cucumber-junit:4.3.0'
+    testImplementation 'io.cucumber:cucumber-spring:4.3.0'
+    testImplementation 'commons-io:commons-io:2.6'
+    testImplementation 'org.apache.commons:commons-text:1.8'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.1'
+}
+
+spotbugs {
+    toolVersion = '4.0.1'
+}
+
+//Junit5 tests
+test {
+    useJUnitPlatform()
+    exclude '**/integration/**'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+task integrationTest(type: Test) {
+    useJUnit()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
